@@ -51,6 +51,13 @@ def search_wikipedia(query: str) -> str:
     wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
     return wikipedia.run(query)
 
+@tool
+def add_numbers(a: int,b: int) -> int:
+    """Use this function when user asks to perform add or perform sum or perform addition and give a summary of the result."""
+    return a + b
+
+
+
 # Test the wikipedia tool
 #wiki_result = search_wikipedia.invoke("Donald Trump")
 #print("WIKI RESULT", wiki_result)
@@ -66,13 +73,13 @@ model = ChatOllama(temperature=1, model="llama3.2:3b")
 
 # List of tools creeated 
 
-tools = [search_duckduckgo,search_wikipedia]
+tools = [search_duckduckgo,search_wikipedia,add_numbers]
 
 # Create Langgraph agent with tools
 react_agent = create_react_agent(model, tools=tools)
 
 # Define simple user query
-query = "what is todays date?"
+query = "give me sum of 2 and 3"
 
 # Invoke the agent
 messages = react_agent.invoke({"messages": [("human", query)]})
