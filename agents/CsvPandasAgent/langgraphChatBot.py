@@ -17,7 +17,7 @@ from langchain.prompts import ChatPromptTemplate
 
 model = ChatOllama(temperature=0.5, model="deepseek-r1:7b")
 
-# # Define the nodes
+# # Define the nodes for test
 # def chatbot(state: State):
 #     return {"messages": [model.invoke(state["messages"])]}
 
