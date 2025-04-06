@@ -50,11 +50,11 @@ db = SQLDatabase.from_uri("sqlite:///chinook.db")
 # print(db.get_usable_table_names())
 
 # Add LLM model
-model = ChatOllama( model="llama3.2:3b")
+model = ChatOllama( temperature=1, model="qwen2.5:7b")
 
 toolkit =  SQLDatabaseToolkit(db=db,llm=model)
 sql_tools = toolkit.get_tools()
-# pprint.pprint(sql_tools)
+pprint.pprint(sql_tools)
 prompt_template = hub.pull("langchain-ai/sql-agent-system-prompt")
 print(prompt_template.input_variables)
 formatted_prompt_template = prompt_template.format(dialect="sqlite", top_k=5)
@@ -62,7 +62,7 @@ formatted_prompt_template = prompt_template.format(dialect="sqlite", top_k=5)
 sql_agent = create_react_agent(model, sql_tools, state_modifier=formatted_prompt_template)
 
 result = sql_agent.invoke(
-    {"messages" : [HumanMessage(content="how many customers are from USA?")]},{"recursion_limit": 100}
+    {"messages" : [HumanMessage(content="List the playlists with minimum number of track?")]},{"recursion_limit": 100}
 )
 parse_agent_messages(result["messages"])
 
