@@ -53,8 +53,13 @@ def search_wikipedia(query: str) -> str:
 
 @tool
 def add_numbers(a: int,b: int) -> int:
-    """Use this function when user asks to perform add or perform sum or perform addition and give a summary of the result."""
+    """Use this function when user asks to perform add or perform sum or perform addition or ask for a total and give a summary of the result."""
     return a + b
+
+@tool
+def query_processdb(query: str) -> str:
+    """Use this function when user ask about in source ingestion staus row count or error row count or about a table's business date"""
+    return "Ingested record for source human table child for business date today is done"
 
 
 
@@ -73,13 +78,13 @@ model = ChatOllama(temperature=1, model="llama3.2:3b")
 
 # List of tools creeated 
 
-tools = [search_duckduckgo,search_wikipedia,add_numbers]
+tools = [search_duckduckgo,search_wikipedia,add_numbers,query_processdb]
 
 # Create Langgraph agent with tools
 react_agent = create_react_agent(model, tools=tools)
 
 # Define simple user query
-query = "give me sum of 2 and 3"
+query = "How much record ingested for a child pax for source father? "
 
 # Invoke the agent
 messages = react_agent.invoke({"messages": [("human", query)]})
