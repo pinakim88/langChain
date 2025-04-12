@@ -1,21 +1,14 @@
-import pprint
 from langgraph.graph import StateGraph
 from typing import Annotated
 from typing_extensions import TypedDict
 from langgraph.graph.message import add_messages
 from langchain_ollama import ChatOllama
-from tavily import TavilyClient
-from langchain.prompts import ChatPromptTemplate
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langgraph.prebuilt import ToolNode,tools_condition
-from IPython.display import Image, display
+#from IPython.display import Image, display
 from langchain_core.tools import tool
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
-from langchain_community.utilities import DuckDuckGoSearchAPIWrapper,WikipediaAPIWrapper
-from langchain_community.tools import WikipediaQueryRun
-
-
-
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.memory import MemorySaver
 
 #Initialized the model
 model = ChatOllama(temperature=0.5, model="qwen2.5:7b")
@@ -39,7 +32,7 @@ def chatbot(state: State):
 graph_builder.add_node("chatbot", chatbot)
 
 
-#Lets create tooNode run the tools if they are called by adding the tools to a new node
+#Lets create toolNode run the tools if they are called by adding the tools to a new node
 #this node runs the tools requested in the AIMessage
 
 tool_node = ToolNode(tools=[tool])
@@ -65,38 +58,29 @@ graph_builder.set_entry_point("chatbot")
 
 graph = graph_builder.compile()
 
-#graph visualize
+#graph visualize uncomment in the import section 
+#from IPython.display import Image, display
 
 # display(Image(graph.get_graph().draw_mermaid_png))
 # print(graph.get_graph().draw_ascii())
+
+#Add memory to the graph
+memory = SqliteSaver.from_conn_string(':memory:')
+graph = graph_builder.compile(checkpointer=MemorySaver())
+
+
+#Chatbot with memory
 while True:
     user_input = input('User: ')
     if user_input.lower() in ['quit','exit','bye',':q','!q']:
         print('Goodbye!')
         break
-    for event in graph.stream({'messages': ('user', user_input)}):
+    config = {'configurable' : {'thread_id': '1'}}
+    for event in graph.stream({'messages': ('user', user_input)}, config=config):
         for value in event.values():
             print(f'Assistant: {value["messages"][-1].content}')
             print('-'* 20)
 
-def parse_agent_messages(messages):
-    for msg in messages:
-        if isinstance(msg, HumanMessage):
-            print(f"User: {msg.content}\n")
-        elif isinstance(msg, AIMessage):
-            if 'tool_calls' in msg.additional_kwargs and msg.additional_kwargs['tool_calls']:
-                print("Agent is deciding to use tools...\n")
-                for tool_call in msg.additional_kwargs['tool_calls']:
-                    tool_name = tool_call['function']['name']
-                    arguments = tool_call['function']['arguments']
-                    print(f"Agent calls tool: {tool_name} with arguments {arguments}\n")
-            else:
-                print(f"Agents Final response:\n{msg.content}\n")
-        elif isinstance(msg, ToolMessage):
-            tool_name = msg.name
-            print(f"Tool [{tool_name}] Response:\n{msg.content}\n")
-        else:
-            print(f"Unknown message type: {msg}\n")
 
 # To install: pip install tavily-python
 
