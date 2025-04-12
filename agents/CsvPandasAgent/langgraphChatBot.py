@@ -75,11 +75,13 @@ while True:
     if user_input.lower() in ['quit','exit','bye',':q','!q']:
         print('Goodbye!')
         break
+
     config = {'configurable' : {'thread_id': '1'}}
+
     for event in graph.stream({'messages': ('user', user_input)}, config=config):
         for value in event.values():
             print(f'Assistant: {value["messages"][-1].content}')
-            print('-'* 20)
+            print('-'* 50)
 
 
 # To install: pip install tavily-python
