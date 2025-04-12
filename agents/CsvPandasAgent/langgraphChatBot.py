@@ -18,7 +18,7 @@ class State(TypedDict):
 
 graph_builder = StateGraph(State)
 
-tool = TavilySearchResults(max_result=3,tavily_api_key="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")
+tool = TavilySearchResults(max_result=3,tavily_api_key="<your api key>")
 tools = [tool]
 
 model_with_tools = model.bind_tools(tools)
@@ -88,7 +88,7 @@ while True:
 
 # query='what is the latest news with Google Next 2025?'
 
-# client = TavilyClient("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")
+# client = TavilyClient("<Your API key>")
 # response = client.search(query,max_results=8,search_depth='advanced')['results']
 
 # # print(response)
