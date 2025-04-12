@@ -60,25 +60,32 @@ reflection = ''
 
 ## define a function for the generation node
 def generation_node(state: Sequence[BaseMessage]):
-    return generate_chain.invoke(
+    print("[Generation Node] Input State:", state)
+    result = generate_chain.invoke(
         {'messages': state}
     )
+    print("[Generation Node] Output:", result.content)
+    return result
+
 #define a function for the reflection node
 # Switching the roles of 'human' and 'ai' in the reflection_node function
 def reflection_node(messages: Sequence[BaseMessage]) -> List[BaseMessage]:
+    print("[Reflection Node] Input Messages:", messages)
     # Convert messages to a format supported by Ollama
     ollama_messages = [
         {
-            "role": "assistant" if msg.type == "human" else "user",  # Switched roles
+            "role": "ai" if msg.type == "human" else "ai",  # Switched roles
             "content": msg.content
         }
         for msg in messages
     ]
+    print("[Reflection Node] Converted Messages:", ollama_messages)
 
     res = reflect_chain.invoke(
         {"messages": ollama_messages}
     )
 
+    print("[Reflection Node] Output:", res.content)
     # Return the result as a HumanMessage
     return HumanMessage(
         content=res.content,
@@ -112,7 +119,7 @@ builder.add_edge('reflect', 'generate')
 graph = builder.compile()
 
 input = HumanMessage(
-    content='How to gorw as a Leader in the age of AI'
+    content='Generate a linkedin post for the topic of USA election 2024.'
 )
 #run the graph
 response = graph.invoke(input)
