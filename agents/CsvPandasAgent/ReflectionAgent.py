@@ -3,19 +3,6 @@ from langchain_core.messages import HumanMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from typing import List, Sequence
 from langgraph.graph import END, MessageGraph
-
-#import pprint
-# from langgraph.checkpoint.sqlite import SqliteSaver
-# from langgraph.checkpoint.memory import MemorySaver
-# from langchain_community.tools.tavily_search import TavilySearchResults
-# from langgraph.prebuilt import ToolNode,tools_condition
-# #from IPython.display import Image, display
-# from langchain_core.tools import tool
-# from langgraph.graph import StateGraph
-# from typing import Annotated
-# from typing_extensions import TypedDict
-# from langgraph.graph.message import add_messages
-
 #STEP - 1 GENERATE 
 #BUILD GENERATE PROMPT & CHAIN
 # Creating a chat promt template
@@ -77,35 +64,36 @@ def generation_node(state: Sequence[BaseMessage]):
         {'messages': state}
     )
 #define a function for the reflection node
+# Switching the roles of 'human' and 'ai' in the reflection_node function
 def reflection_node(messages: Sequence[BaseMessage]) -> List[BaseMessage]:
-    #messages we need to adjust
-    cls_map = {
-        
-        'ai': HumanMessage,  
-        'human': BaseMessage
-        
+    # Convert messages to a format supported by Ollama
+    ollama_messages = [
+        {
+            "role": "assistant" if msg.type == "human" else "user",  # Switched roles
+            "content": msg.content
         }
-#first message is the user request. We keep it the same for all nodes
-    translated = [messages[0]] + [
-    cls_map[msg.type](content=msg.content) for msg in messages[1:]
+        for msg in messages
     ]
+
     res = reflect_chain.invoke(
-        {'messages': translated}
+        {"messages": ollama_messages}
     )
-    #We treat the output of AI message for the the generator
+
+    # Return the result as a HumanMessage
     return HumanMessage(
-        content=res.content
+        content=res.content,
+        type="human"  # Ensuring the type is always 'human'
     )
 # Create the graph
 builder = MessageGraph()
 builder.add_node('generate', generation_node)
-builder.add_node('reflec', reflection_node)
+builder.add_node('reflect', reflection_node)
 
 builder.set_entry_point('generate')
 
 #define the conditional edge
 MAX_ITARATIONS = 5
-def shouls_continue(state: List[BaseMessage]):
+def should_continue(state: List[BaseMessage]):
     #check the number of iterations
     if len(state) > MAX_ITARATIONS:
         return END
@@ -117,14 +105,14 @@ def shouls_continue(state: List[BaseMessage]):
 
 #add the edge to graph
 builder.add_conditional_edges(
-    'generate', shouls_continue
+    'generate', should_continue
 )
-builder.add_edge('reflec', 'generate')
+builder.add_edge('reflect', 'generate')
 
 graph = builder.compile()
 
 input = HumanMessage(
-    content='Carrier of the future: How to be a successful leader in the age of AI'
+    content='How to gorw as a Leader in the age of AI'
 )
 #run the graph
 response = graph.invoke(input)
@@ -132,6 +120,3 @@ response = graph.invoke(input)
 for message in response:
     print(message.content)
     print('\n' + '-' * 100 + '\n')
-
-
-
