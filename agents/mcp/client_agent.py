@@ -10,9 +10,14 @@ async def main():
     async with MultiServerMCPClient(
         {
             "weather": {
-#make sure you start your weather server on port 8000
-                "url":"http://localhost:8000/sse",
-                "transport":"sse",
+                # Make sure you start your weather server on port 8000
+                "url": "http://localhost:8000/sse",
+                "transport": "sse",
+            },
+            "math": {
+                # Make sure you start your math server on port 8001
+                "url": "http://localhost:8001/sse",
+                "transport": "sse",
             }
         }
     ) as client:
@@ -20,9 +25,10 @@ async def main():
         agent = create_react_agent(model, client.get_tools())
 
         # Use the agent to call the get_weather tool
-        weather_response = await agent.ainvoke({"messages":[{"role":"user","content":"what is the current weather in New York?"}]})
-        print("Weather Response:", weather_response["messages"][-1].content)
+        response = await agent.ainvoke({"messages": [{"role": "user", "content": "Ram has 2 banana and Sam has 3 banana ,\
+        How many total Banana they have ? now they gave have 2 banana to Hari how many total banana Ram and Sam has now? after\
+        this Jadu asked can you multily total left banana with ram and sam by 10?"}]})
+        print("Response:", response["messages"][-1].content)
 
 if __name__ == "__main__":
-    print("hello")
     asyncio.run(main())
