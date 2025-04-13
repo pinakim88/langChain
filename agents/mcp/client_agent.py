@@ -23,6 +23,7 @@ async def main():
     ) as client:
         # Create a React agent with the chat model and the MCP client
         agent = create_react_agent(model, client.get_tools())
+        print(agent, debug=True)
 
         # Use the agent to call the get_weather tool
         response = await agent.ainvoke({"messages": [{"role": "user", "content": "Ram has 2 banana and Sam has 3 banana ,\

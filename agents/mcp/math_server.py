@@ -8,17 +8,22 @@ mcp.settings.port = 8001
 @mcp.tool()
 async def add(a:int, b:int) -> int:
     """use this tool to add two numbers, sum two numbers, addition of two numbers or when user ask for any total number."""
+    print("calling add")
     return (a + b)
 
 @mcp.tool()
 async def minus(a:int, b:int) -> int:
     """use this tool to minus two numbers, deduct betwee two numbers, user or someone gave something to others then how many
-      left with user or someone."""
-    if a> b :
-     return (a -b)
-    else: return (b-a)
+left with user or someone."""
+    print("calling Minus")
+      if a> b :
+        return (a-b)
+      else: return(b-a)
+
+
 @mcp.tool()
 async def multi(a:int, b:int) -> int:
+    print("calling Multi")
     """use this tool to multiply two numbers, cross product of two numbers."""
     return (a * b)
 
