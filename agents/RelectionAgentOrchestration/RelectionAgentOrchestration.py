@@ -176,7 +176,7 @@ prompt = {
 
 events = graph.stream(prompt,thread)
 for e in events:
-    print(e)
-    print("===" * 100)       
+    pprint.pprint(e)
+    pprint.pprint("===" * 100)       
 #The final product
 
